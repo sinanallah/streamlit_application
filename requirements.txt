@@ -6,4 +6,4 @@ six==1.16.0
 tzdata==2023.3
 matplotlib >= 3.7.1
 streamlit >= 1.21.0
-seaborm >= 0.12.2
+seaborn >= 0.12.2
