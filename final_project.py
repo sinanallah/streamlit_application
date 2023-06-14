@@ -39,6 +39,10 @@ def get_five_number_summary(column_data):
     }
 
     return summary
+  
+def get_value_counts(column_data):
+    value_counts = column_data.value_counts()
+    return value_counts
 
 web_apps = st.sidebar.selectbox("Select Web Apps",
                                 ("Exploratory Data Analysis", "Distributions, Correlation Analysis"))
@@ -86,35 +90,29 @@ if web_apps == "Exploratory Data Analysis":
       plt.xlabel(selected_column)
       plt.ylabel('Density')
       st.pyplot(plt)
-
-
-      # Heatmap
-      plt.figure(figsize=(10, 8))
-      corr = df.corr()
-      sns.heatmap(corr, annot=True, cmap='coolwarm')
-      plt.title("Correlation Heatmap")
-      st.pyplot(plt)
-
-
+      
+      
     elif column_type == "Categorical":
       categorical_columns = df.select_dtypes(include=['object']).columns.tolist()
       selected_column = st.sidebar.selectbox('Select a Column', categorical_columns)
       st.write(f"Selected Column: {selected_column}")
       column_data = df[selected_column]
       
-      st.write("Proportions of Each Category Level:")
-      category_counts = column_data.value_counts(normalize=True)
-      category_table = pd.DataFrame({'Category': category_counts.index, 'Proportion': category_counts.values})
-      st.table(category_table)
+      column_data = column_data.dropna().astype(str)
+      
+      st.write("Value Counts:")
+      value_counts = get_value_counts(column_data)
+      value_counts_table = pd.DataFrame({'Category': value_counts.index, 'Count': value_counts.values})
+      st.table(value_counts_table)
 
       # Customized bar plot
       bar_color_key = f"bar_color_{selected_column}"
       choose_color = st.color_picker('Pick a Color', "#69b3a2", key=bar_color_key)
 
       plt.figure(figsize=(10, 6))
-      sns.barplot(x=category_table['Category'], y=category_table['Proportion'], color=choose_color)
-      plt.title(f"Proportions of {selected_column}")
-      plt.xlabel('Team')
-      plt.ylabel('Proportion')
+      sns.barplot(x=value_counts_table['Category'], y=value_counts_table['Count'], color=choose_color)
+      plt.title(f"Value Counts of {selected_column}")
+      plt.xlabel(selected_column)
+      plt.ylabel('Count')
       plt.xticks(rotation=45)
       st.pyplot(plt)

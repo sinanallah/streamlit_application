@@ -53,67 +53,76 @@ if web_apps == "Exploratory Data Analysis":
 
     if show_df:
       st.write(df)
-      
+
     statistics = get_dataset_statistics(df)
-            
+
     st.write("Dataset Statistics:")
     for stat, value in statistics.items():
         st.write(f"- {stat}: {value}")
 
     column_type = st.sidebar.selectbox('Select Data Type',
-                                       ("Numerical", "Categorical"))
+                                       ("Numerical", "Categorical", "Bool", "Date"))
 
     if column_type == "Numerical":
-      numerical_columns = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
-      selected_column = st.sidebar.selectbox('Select a Column', numerical_columns)
-      st.write(f"Selected Column: {selected_column}")
-      column_data = df[selected_column]
-      summary = get_five_number_summary(column_data)
-      
-      st.write("Five-Number Summary:")
-      summary_table = pd.DataFrame(summary, index=["Values"])
-      st.table(summary_table)
+        numerical_columns = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
+        selected_column = st.sidebar.selectbox('Select a Column', numerical_columns)
+        st.write(f"Selected Column: {selected_column}")
+        column_data = df[selected_column]
+        summary = get_five_number_summary(column_data)
 
-      # Distribution plot
-      num_bins = st.slider('Number of Bins', min_value=5, max_value=100, value=30)
-      opacity = st.slider('Opacity', min_value=0.0, max_value=1.0, step=0.1, value=1.0)
-      hist_color_key = f"hist_color_{selected_column}"
-      choose_color = st.color_picker('Pick a Color', "#69b3a2", key=hist_color_key)
+        st.write("Five-Number Summary:")
+        summary_table = pd.DataFrame(summary, index=["Values"])
+        st.table(summary_table)
 
-      plt.figure(figsize=(8, 6))
-      sns.histplot(column_data, kde=True, color=choose_color, bins=num_bins, alpha=opacity)
-      plt.title(f"Distribution of {selected_column}")
-      plt.xlabel(selected_column)
-      plt.ylabel('Density')
-      st.pyplot(plt)
-      
-      # Heatmap
-      plt.figure(figsize=(10, 8))
-      corr = df.corr()
-      sns.heatmap(corr, annot=True, cmap='coolwarm')
-      plt.title("Correlation Heatmap")
-      st.pyplot(plt)
+        # Distribution plot
+        num_bins = st.slider('Number of Bins', min_value=5, max_value=100, value=30)
+        opacity = st.slider('Opacity', min_value=0.0, max_value=1.0, step=0.1, value=1.0)
+        hist_color_key = f"hist_color_{selected_column}"
+        choose_color = st.sidebar.color_picker('Pick a Color', "#69b3a2", key=hist_color_key)
+
+        plt.figure(figsize=(8, 6))
+        sns.histplot(column_data.dropna(), kde=True, color=choose_color, bins=num_bins, alpha=opacity)
+        plt.title(f"Distribution of {selected_column}")
+        plt.xlabel(selected_column)
+        plt.ylabel('Density')
+        st.pyplot(plt)
+        
+        # Heatmap
+        plt.figure(figsize=(10, 8))
+        corr = df.corr()
+        sns.heatmap(corr, annot=True, cmap='coolwarm')
+        plt.title("Correlation Heatmap")
+        st.pyplot(plt)
 
     elif column_type == "Categorical":
-      categorical_columns = df.select_dtypes(include=['object']).columns.tolist()
-      selected_column = st.sidebar.selectbox('Select a Column', categorical_columns)
-      st.write(f"Selected Column: {selected_column}")
-      column_data = df[selected_column]
-      
-      st.write("Proportions of each category level:")
-      proportions = column_data.value_counts(normalize=True)
-      proportions_table = pd.DataFrame(proportions, columns=["Proportion"])
-      st.table(proportions_table)
+        categorical_columns = df.select_dtypes(include=['object']).columns.tolist()
+        selected_column = st.sidebar.selectbox('Select a Column', categorical_columns)
+        st.write(f"Selected Column: {selected_column}")
+        column_data = df[selected_column]
 
-      # Customized bar plot
-      bar_color_key = f"bar_color_{selected_column}"
-      choose_color = st.color_picker('Pick a Color', "#69b3a2", key=bar_color_key)
-      bar_title = st.text_input('Set Title', f"Bar Plot of {selected_column}")
+        st.write("Proportions of each category level:")
+        proportions = column_data.value_counts(normalize=True)
+        proportions_table = pd.DataFrame(proportions, columns=["Proportion"])
+        st.table(proportions_table)
 
-      plt.figure(figsize=(8, 6))
-      sns.countplot(x=selected_column, data=df, color=choose_color)
-      plt.title(bar_title)
-      plt.xlabel(selected_column)
-      plt.ylabel('Count')
-      plt.xticks(rotation=45)
-      st.pyplot(plt)
+        # Customized bar plot
+        bar_color_key = f"bar_color_{selected_column}"
+        choose_color = st.sidebar.color_picker('Pick a Color', "#69b3a2", key=bar_color_key)
+        bar_title = st.text_input('Set Title', f"Bar Plot of {selected_column}")
+
+        plt.figure(figsize=(8, 6))
+        sns.countplot(x=selected_column, data=df, color=choose_color)
+        plt.title(bar_title)
+        plt.xlabel(selected_column)
+        plt.ylabel('Count')
+        plt
+        
+        
+        
+        
+        
+        
+       st.write("Proportions of Each Category Level:")
+       category_counts = column_data.value_counts(normalize=True)
+       category_table = pd.DataFrame({'Category': category_counts.index, 'Proportion': category_counts.values})
+       st.table(category_table)
